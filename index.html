@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>GCF Student Portal | Next-Gen Enrollment</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            cursor: none; /* Hide default cursor for custom effect */
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --accent: #8b5cf6;
+            --glass: rgba(255, 255, 255, 0.96);
+            --text-main: #1f2937;
+            --success: #10b981;
+            --shadow-xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+            color: var(--text-main);
+        }
+
+        /* ========== CUSTOM CURSOR ========== */
+        #cursor-dot {
+            position: fixed;
+            width: 8px;
+            height: 8px;
+            background: linear-gradient(135deg, #c084fc, #818cf8);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 10000;
+            transform: translate(-50%, -50%);
+            transition: width 0.2s, height 0.2s, background 0.2s;
+            box-shadow: 0 0 12px #a855f7;
+        }
+        #cursor-ring {
+            position: fixed;
+            width: 34px;
+            height: 34px;
+            border: 2px solid rgba(139, 92, 246, 0.7);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: width 0.25s, height 0.25s, border-color 0.2s, background 0.2s;
+            backdrop-filter: blur(2px);
+            background: rgba(99, 102, 241, 0.08);
+        }
+        .cursor-hover {
+            width: 52px !important;
+            height: 52px !important;
+            border-color: #f0abfc !important;
+            background: rgba(192, 132, 252, 0.15) !important;
+        }
+        .cursor-dot-hover {
+            width: 14px !important;
+            height: 14px !important;
+            background: #e879f9 !important;
+        }
+
+        /* ========== DYNAMIC FLOATING BACKGROUND (Particle & Orb System) ========== */
+        #dynamic-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            overflow: hidden;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #2e1065 100%);
+        }
+        
+        .floating-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(70px);
+            opacity: 0.45;
+            animation: floatOrb 22s infinite alternate ease-in-out;
+            will-change: transform;
+            pointer-events: none;
+        }
+        
+        @keyframes floatOrb {
+            0% { transform: translate(0, 0) scale(1); opacity: 0.25; }
+            100% { transform: translate(60px, -50px) scale(1.3); opacity: 0.6; }
+        }
+        
+        .particle {
+            position: absolute;
+            background: radial-gradient(circle, #a78bfa, #c084fc);
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            opacity: 0;
+            box-shadow: 0 0 12px 2px rgba(139, 92, 246, 0.6);
+            animation: floatParticle 18s infinite linear;
+            pointer-events: none;
+        }
+        
+        @keyframes floatParticle {
+            0% {
+                transform: translateY(110vh) translateX(0) rotate(0deg);
+                opacity: 0;
+            }
+            15% { opacity: 0.8; }
+            85% { opacity: 0.7; }
+            100% {
+                transform: translateY(-20vh) translateX(80px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        
+        .star {
+            position: absolute;
+            background: white;
+            width: 2px;
+            height: 2px;
+            border-radius: 50%;
+            opacity: 0;
+            animation: twinkle 4s infinite alternate;
+        }
+        
+        @keyframes twinkle {
+            0% { opacity: 0; transform: scale(0.5); }
+            100% { opacity: 1; transform: scale(1.2); }
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            z-index: 1000;
+            backdrop-filter: blur(2px);
+        }
+        #progress-bar {
+            height: 100%;
+            width: 20%;
+            background: linear-gradient(90deg, var(--success), #34d399);
+            box-shadow: 0 0 12px #34d399;
+            transition: width 0.7s cubic-bezier(0.65, 0, 0.35, 1);
+        }
+
+        /* Sidebar Styling (Glassmorphic) */
+        #sidebar {
+            width: 280px;
+            background: rgba(15, 23, 42, 0.55);
+            backdrop-filter: blur(18px);
+            color: white;
+            padding: 40px 24px;
+            flex-shrink: 0;
+            border-right: 1px solid rgba(255,255,255,0.15);
+            z-index: 10;
+            box-shadow: 6px 0 32px rgba(0,0,0,0.2);
+        }
+
+        .gcf-box {
+            font-size: 32px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #c084fc, #818cf8);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: 2px;
+        }
+
+        #step-indicators p {
+            padding: 12px 18px;
+            margin: 12px 0;
+            border-radius: 16px;
+            transition: 0.4s all cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            opacity: 0.55;
+            font-weight: 600;
+            cursor: pointer;
+            backdrop-filter: blur(4px);
+        }
+
+        #step-indicators p.active-indicator {
+            background: linear-gradient(135deg, rgba(99,102,241,0.4), rgba(139,92,246,0.3));
+            opacity: 1;
+            transform: translateX(8px);
+            box-shadow: 0 6px 14px rgba(0,0,0,0.2);
+            border-left: 3px solid #c084fc;
+        }
+
+        /* Main Content */
+        #main-content {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            perspective: 1500px;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        /* REDESIGNED CREATE PROFILE CARD - Glassmorphic Premium */
+        .step-card {
+            background: rgba(44, 5, 5, 0.94);
+            backdrop-filter: blur(12px);
+            padding: 40px 42px;
+            border-radius: 40px;
+            box-shadow: var(--shadow-xl);
+            width: 100%;
+            max-width: 480px;
+            display: none;
+            transform-style: preserve-3d;
+            border: 1px solid rgba(58, 27, 27, 0.5);
+            transition: all 0.3s;
+        }
+
+        /* First card specific premium design */
+        #step1 {
+            background: linear-gradient(135deg, rgba(57, 43, 94, 0.98), rgba(249,250,255,0.95));
+            border: 1px solid rgba(139,92,246,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        #step1::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(5, 9, 211, 0.08), transparent 70%);
+            animation: rotateGlow 30s infinite linear;
+            pointer-events: none;
+        }
+        @keyframes rotateGlow {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .active {
+            display: block;
+            animation: cardIn 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+        }
+
+        @keyframes cardIn {
+            0% { opacity: 0; transform: translateY(40px) rotateX(-8deg); }
+            100% { opacity: 1; transform: translateY(0) rotateX(0); }
+        }
+
+        input, select {
+            width: 100%;
+            padding: 14px 18px;
+            margin: 12px 0;
+            border: 2px solid #e2e8f0;
+            border-radius: 24px;
+            font-size: 0.95rem;
+            transition: 0.25s;
+            background: white;
+            cursor: text;
+        }
+
+        input:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 8px 20px rgba(99,102,241,0.15);
+            transform: scale(1.01);
+        }
+
+        button {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            border: none;
+            padding: 14px 20px;
+            border-radius: 40px;
+            font-weight: 700;
+            width: 100%;
+            margin-top: 24px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 4px 12px rgba(79,70,229,0.3);
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 20px 30px -8px rgba(99,102,241,0.5);
+            filter: brightness(1.05);
+        }
+
+        /* Quiz styling */
+        .quiz-item {
+            background: #f8fafc;
+            margin: 16px 0;
+            padding: 14px;
+            border-radius: 20px;
+            border: 1px solid #e2e8f0;
+        }
+        .quiz-question {
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #0f172a;
+        }
+        .quiz-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .quiz-opt {
+            background: #f1f5f9;
+            padding: 6px 14px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        .quiz-opt.selected {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 2px 8px rgba(99,102,241,0.4);
+        }
+
+        /* 3D ID Card Action */
+        #id-card-print {
+            background: white;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 20px 35px rgba(0,0,0,0.2);
+            max-width: 350px;
+            margin: 20px auto;
+            transition: transform 0.5s cubic-bezier(0.2, 0.9, 0.4, 1.1), box-shadow 0.5s;
+            cursor: pointer;
+            border: 1px solid rgba(255,255,255,0.4);
+        }
+
+        #id-card-print:hover {
+            transform: rotateY(12deg) rotateX(4deg) scale(1.02);
+            box-shadow: -20px 30px 45px rgba(0,0,0,0.3);
+        }
+
+        .success-badge {
+            font-size: 48px;
+            animation: gentleBounce 2s infinite;
+        }
+        @keyframes gentleBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+        .id-header { background: linear-gradient(135deg, #4f46e5, #7c3aed); color: white; padding: 20px; text-align: center; }
+        .id-body { padding: 20px; display: flex; gap: 18px; background:linear-gradient(red,blue,white); }
+        .id-photo { width: 70px; height: 70px; background: #eef2ff; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 32px; }
+        .label { font-size: 0.65rem; color: #64748b; font-weight: 800; letter-spacing: 0.5px; }
+        .value { font-size: 0.9rem; color: #0f172a; font-weight: 700; }
+
+        /* ========== WELCOME POPUP ========== */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(12px);
+            z-index: 20000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            visibility: hidden;
+            opacity: 0;
+            transition: 0.25s ease;
+        }
+        .popup-overlay.active {
+            visibility: visible;
+            opacity: 1;
+        }
+        .popup-card {
+            background: linear-gradient(145deg, rgba(30, 41, 59, 0.98), rgba(15, 23, 42, 0.98));
+            backdrop-filter: blur(20px);
+            border-radius: 2rem;
+            max-width: 420px;
+            padding: 2rem 2rem 2rem;
+            text-align: center;
+            border: 1px solid rgba(168,85,247,0.5);
+            box-shadow: 0 30px 50px rgba(0,0,0,0.6);
+            animation: floatPop 0.4s cubic-bezier(0.34,1.2,0.64,1);
+        }
+        @keyframes floatPop {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .popup-card h2 {
+            background: linear-gradient(135deg, #e9d5ff, #c084fc);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 12px;
+            font-size: 1.8rem;
+        }
+        .popup-card p {
+            color: #cbd5e1;
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+        .popup-btn {
+            background: linear-gradient(135deg, #4f07f7, #e60676);
+            border: dotted;
+            padding: 12px 32px;
+            border-radius: 40px;
+            font-weight: bold;
+            color: white;
+            font-size: 1rem;
+            cursor: progress;
+            transition: 0.2s;
+        }
+        .popup-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(18, 9, 153, 0.5);
+        }
+
+        @media (max-width: 760px) {
+            #sidebar { width: 220px; padding: 24px 16px; }
+            .step-card { padding: 28px 24px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- WELCOME POPUP (opens on first load) -->
+<div id="welcomePopup" class="popup-overlay">
+    <div class="popup-card">
+        <div style="font-size: 4rem;">🚀</div>
+        <h2>Welcome to GCF Portal</h2>
+        <p>Your futuristic enrollment journey begins here.<br>Secure • Intelligent • Seamless</p>
+        <button class="popup-btn" id="closePopupBtn">✨ Start Enrollment ✨</button>
+    </div>
+</div>
+
+<!-- CUSTOM CURSOR ELEMENTS -->
+<div id="cursor-dot"></div>
+<div id="cursor-ring"></div>
+
+<!-- DYNAMIC FLOATING BACKGROUND -->
+<div id="dynamic-bg"></div>
+
+<div class="progress-container"><div id="progress-bar"></div></div>
+
+<div id="sidebar">
+    <div class="logo-area" style="margin-bottom: 50px;">
+        <div class="gcf-box" style="font-size: 36px; font-weight: 800;">GCF</div>
+        <h2 style="margin:0; font-size: 0.9rem; letter-spacing: 3px; color: #cbd5e1;">PORTAL</h2>
+    </div>
+    <div id="step-indicators">
+        <p id="ind1" class="active-indicator">✨ Personal Info</p>
+        <p id="ind2">📚 Academic Info</p>
+        <p id="ind3">🔐 Create Password</p>
+        <p id="ind4">🧠 Verify</p>
+        <p id="ind5">🎓 Finalize</p>
+    </div>
+</div>
+
+<div id="main-content">
+    <div class="step-card active" id="step1">
+        <h3 style="font-size: 1.8rem; color:#170daa;">Create Profile</h3>
+        <p style="margin-bottom: 24px; color: #38485c;">Step into the future of GCF learning.</p>
+        <input type="text" id="name" placeholder="Full Name">
+        <input type="email" id="email" placeholder="Email Address">
+        <input type="number" id="age" placeholder="Age">
+        <button onclick="nextStep(2)">Get Started →</button>
+    </div>
+
+    <div class="step-card" id="step2">
+        <h3>Academic Setup</h3>
+        <p style="margin-bottom: 20px;">Help us customize your dashboard.</p>
+        <input type="text" id="dept" placeholder="Department (e.g. Computer Science)">
+        <input type="text" id="year" placeholder="Current Year (e.g. 2nd Year)">
+        <input type="text" id="roll" placeholder="Roll Number">
+        <button onclick="nextStep(3)">Continue →</button>
+    </div>
+
+    <div class="step-card" id="step3">
+        <h3>Security</h3>
+        <p style="margin-bottom: 20px;">Secure your student account.</p>
+        <input type="password" id="pw1" placeholder="Create Password">
+        <input type="password" id="pw2" placeholder="Confirm Password">
+        <div id="pw-error" style="color: #ef4444; font-size: 0.75rem; margin-top: -8px; display: none;">⚠ Passwords must match & be at least 6 characters</div>
+        <button onclick="validatePassword()">Secure Account →</button>
+    </div>
+
+    <div class="step-card" id="step4">
+        <h3>Integrity Check</h3>
+        <p>Complete the quick math verification (5 questions).</p>
+        <div id="quiz-container" style="max-height: 320px; overflow-y: auto; margin: 15px 0;"></div>
+        <button onclick="calculateScore()">Submit Portal Access</button>
+    </div>
+
+    <div class="step-card" id="step5">
+        <div style="text-align: center;">
+            <div class="success-badge">🎓 GCF TRAINING</div>
+            <h2 style="color: var(--primary-dark);">Enrollment Complete!</h2>
+            <div style="margin: 15px 0; background: #eef2ff; color: var(--primary); display: inline-block; padding: 8px 24px; border-radius: 40px; font-weight: 800;">
+                QUIZ SCORE: <span id="final-score">0</span>/5
+            </div>
+        </div>
+
+        <div id="id-card-print">
+            <div class="id-header">
+                <div style="font-weight: 800; letter-spacing: 1px;">GCF INSTITUTE</div>
+                <div style="font-size: 0.65rem; opacity: 0.9;">STUDENT ACCESS CARD</div>
+            </div>
+            <div class="id-body">
+                <div class="id-photo">👨‍🎓</div>
+                <div style="flex:1">
+                    <div class="label">FULL NAME</div>
+                    <div class="value" id="print-name">—</div>
+                    <div style="display: flex; gap: 12px; margin-top: 12px;">
+                        <div style="flex:1">
+                            <div class="label">DEPT</div>
+                            <div class="value" id="print-dept" style="font-size: 0.75rem;">—</div>
+                        </div>
+                        <div style="flex:1">
+                            <div class="label">ROLL NO</div>
+                            <div class="value" id="print-roll" style="font-size: 0.75rem;">—</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button onclick="window.print()" style="background: #1e293b;">🖨️ Download ID Card</button><br>
+        <button onclick="location.reload()" style="background: transparent; color: #475569; border: 2px solid #cbd5e1; margin-top: 12px;">⟳ New Registration</button>
+    </div>
+</div>
+
+<script>
+    // ======================== CUSTOM CURSOR LOGIC ========================
+    const dot = document.getElementById('cursor-dot');
+    const ring = document.getElementById('cursor-ring');
+    let mouseX = 0, mouseY = 0;
+    document.addEventListener('mousemove', (e) => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+        dot.style.left = mouseX + 'px';
+        dot.style.top = mouseY + 'px';
+        ring.style.left = mouseX + 'px';
+        ring.style.top = mouseY + 'px';
+    });
+    const interactiveElements = 'button, input, select, .quiz-opt, .step-card, #step-indicators p, .popup-btn';
+    document.addEventListener('mouseover', (e) => {
+        if(e.target.matches(interactiveElements)) {
+            ring.classList.add('cursor-hover');
+            dot.classList.add('cursor-dot-hover');
+        }
+    });
+    document.addEventListener('mouseout', (e) => {
+        if(e.target.matches(interactiveElements)) {
+            ring.classList.remove('cursor-hover');
+            dot.classList.remove('cursor-dot-hover');
+        }
+    });
+    document.addEventListener('mousedown', () => {
+        ring.style.transform = 'translate(-50%, -50%) scale(0.85)';
+        dot.style.transform = 'translate(-50%, -50%) scale(0.7)';
+    });
+    document.addEventListener('mouseup', () => {
+        ring.style.transform = 'translate(-50%, -50%) scale(1)';
+        dot.style.transform = 'translate(-50%, -50%) scale(1)';
+    });
+
+    // ======================== DYNAMIC FLOATING BACKGROUND ========================
+    function createDynamicBackground() {
+        const bgContainer = document.getElementById('dynamic-bg');
+        if (!bgContainer) return;
+        bgContainer.innerHTML = '';
+        const orbColors = [
+            'radial-gradient(circle at 30% 30%, rgba(99,102,241,0.6), rgba(139,92,246,0.2))',
+            'radial-gradient(circle at 70% 20%, rgba(168,85,247,0.55), rgba(236,72,153,0.2))',
+            'radial-gradient(circle at 40% 80%, rgba(16,185,129,0.45), rgba(59,130,246,0.2))',
+            'radial-gradient(circle at 60% 40%, rgba(245,158,11,0.5), rgba(139,92,246,0.15))',
+            'radial-gradient(circle at 20% 70%, rgba(99,102,241,0.65), rgba(79,70,229,0.25))',
+            'radial-gradient(circle at 85% 15%, rgba(236,72,153,0.5), rgba(168,85,247,0.2))',
+            'radial-gradient(circle at 10% 45%, rgba(34,197,94,0.45), rgba(16,185,129,0.15))',
+            'radial-gradient(circle at 75% 85%, rgba(139,92,246,0.6), rgba(99,102,241,0.3))'
+        ];
+        for (let i = 0; i < 10; i++) {
+            const orb = document.createElement('div');
+            orb.classList.add('floating-orb');
+            const size = 180 + Math.random() * 220;
+            orb.style.width = size + 'px';
+            orb.style.height = size + 'px';
+            orb.style.left = Math.random() * 100 + '%';
+            orb.style.top = Math.random() * 100 + '%';
+            orb.style.animationDelay = (Math.random() * 5) + 's';
+            orb.style.animationDuration = 15 + Math.random() * 18 + 's';
+            orb.style.background = orbColors[i % orbColors.length];
+            orb.style.filter = 'blur(60px)';
+            bgContainer.appendChild(orb);
+        }
+        for (let i = 0; i < 140; i++) {
+            const particle = document.createElement('div');
+            particle.classList.add('particle');
+            const size = 2 + Math.random() * 6;
+            particle.style.width = size + 'px';
+            particle.style.height = size + 'px';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 20 + 's';
+            particle.style.animationDuration = 12 + Math.random() * 22 + 's';
+            particle.style.background = `radial-gradient(circle, #c4b5fd, #a78bfa)`;
+            particle.style.boxShadow = `0 0 ${6 + Math.random() * 8}px #a855f7`;
+            bgContainer.appendChild(particle);
+        }
+        for (let i = 0; i < 80; i++) {
+            const star = document.createElement('div');
+            star.classList.add('star');
+            star.style.left = Math.random() * 100 + '%';
+            star.style.top = Math.random() * 100 + '%';
+            star.style.animationDelay = Math.random() * 5 + 's';
+            star.style.animationDuration = 3 + Math.random() * 4 + 's';
+            star.style.opacity = 0.3 + Math.random() * 0.7;
+            bgContainer.appendChild(star);
+        }
+    }
+    createDynamicBackground();
+    
+    // ========== POPUP LOGIC ==========
+    const popup = document.getElementById('welcomePopup');
+    window.addEventListener('load', () => {
+        setTimeout(() => {
+            popup.classList.add('active');
+        }, 200);
+    });
+    document.getElementById('closePopupBtn').addEventListener('click', () => {
+        popup.classList.remove('active');
+    });
+    
+    // ========== Student Registration Logic ==========
+    let currentStep = 1;
+    let userData = {
+        name: '', email: '', age: '', dept: '', year: '', roll: '', password: ''
+    };
+    let quizScore = 0;
+    let quizAnswers = {};
+    
+    const quizBank = [
+        { q: "What is 36 ÷ 3?", options: ["4", "12", "8", "9"], answer: 1 },
+        { q: "Solve: 15 × 2 = ?", options: ["35", "30", "50", "55"], answer: 1 },
+        { q: "If x + 12 = 27, then x = ?", options: ["10", "12", "15", "18"], answer: 2 },
+        { q: "What is 25% of 200?", options: ["25", "40", "50", "60"], answer: 2 },
+        { q: "√81 = ?", options: ["7", "8", "9", "10"], answer: 2 }
+    ];
+    
+    function updateProgress() {
+        const percent = ((currentStep - 1) / 4) * 100;
+        document.getElementById('progress-bar').style.width = percent + '%';
+        for (let i = 1; i <= 5; i++) {
+            const ind = document.getElementById(`ind${i}`);
+            if (i === currentStep) ind.classList.add('active-indicator');
+            else ind.classList.remove('active-indicator');
+        }
+    }
+    
+    function nextStep(step) {
+        if (step === 2) {
+            let name = document.getElementById('name').value.trim();
+            let email = document.getElementById('email').value.trim();
+            let age = document.getElementById('age').value.trim();
+            if (!name || !email || !age) {
+                alert("Please fill all personal details.");
+                return;
+            }
+            if (!email.includes('@') || !email.includes('.')) {
+                alert("Enter a valid email address.");
+                return;
+            }
+            if (parseInt(age) < 16 || parseInt(age) > 70) {
+                alert("Age must be between 16 and 70.");
+                return;
+            }
+            userData.name = name;
+            userData.email = email;
+            userData.age = age;
+        }
+        if (step === 3) {
+            let dept = document.getElementById('dept').value.trim();
+            let year = document.getElementById('year').value.trim();
+            let roll = document.getElementById('roll').value.trim();
+            if (!dept || !year || !roll) {
+                alert("Please fill all academic details.");
+                return;
+            }
+            userData.dept = dept;
+            userData.year = year;
+            userData.roll = roll;
+        }
+        
+        document.querySelector(`.step-card.active`).classList.remove('active');
+        currentStep = step;
+        document.getElementById(`step${currentStep}`).classList.add('active');
+        
+        if (currentStep === 4) {
+            renderQuiz();
+        }
+        if (currentStep === 5) {
+            finalizeSummary();
+        }
+        updateProgress();
+    }
+    
+    function validatePassword() {
+        let p1 = document.getElementById('pw1').value;
+        let p2 = document.getElementById('pw2').value;
+        let errDiv = document.getElementById('pw-error');
+        if (p1.length < 6 || p2.length < 6 || p1 !== p2) {
+            errDiv.style.display = 'block';
+            return;
+        }
+        errDiv.style.display = 'none';
+        userData.password = p1;
+        nextStep(4);
+    }
+    
+    function renderQuiz() {
+        const container = document.getElementById('quiz-container');
+        container.innerHTML = '';
+        quizBank.forEach((item, idx) => {
+            const qDiv = document.createElement('div');
+            qDiv.className = 'quiz-item';
+            qDiv.innerHTML = `<div class="quiz-question">${idx+1}. ${item.q}</div><div class="quiz-options" id="quiz-opts-${idx}"></div>`;
+            container.appendChild(qDiv);
+            const optsDiv = qDiv.querySelector(`.quiz-options`);
+            item.options.forEach((opt, optIdx) => {
+                const optSpan = document.createElement('span');
+                optSpan.className = 'quiz-opt';
+                optSpan.textContent = opt;
+                optSpan.dataset.qIdx = idx;
+                optSpan.dataset.optVal = optIdx;
+                optSpan.onclick = () => selectQuizOption(idx, optIdx);
+                if (quizAnswers[idx] === optIdx) optSpan.classList.add('selected');
+                optsDiv.appendChild(optSpan);
+            });
+        });
+    }
+    
+    function selectQuizOption(qIdx, optVal) {
+        quizAnswers[qIdx] = optVal;
+        const container = document.getElementById('quiz-container');
+        const items = container.querySelectorAll('.quiz-item');
+        if (items[qIdx]) {
+            const opts = items[qIdx].querySelectorAll('.quiz-opt');
+            opts.forEach((opt, i) => {
+                if (i === optVal) opt.classList.add('selected');
+                else opt.classList.remove('selected');
+            });
+        }
+    }
+    
+    function calculateScore() {
+        let score = 0;
+        for (let i = 0; i < quizBank.length; i++) {
+            if (quizAnswers[i] !== undefined && quizAnswers[i] === quizBank[i].answer) {
+                score++;
+            }
+        }
+        quizScore = score;
+        const passThreshold = 3;
+        if (quizScore < passThreshold) {
+            alert(`You scored ${quizScore}/5. Need at least ${passThreshold} correct to verify integrity. Please retry.`);
+            quizAnswers = {};
+            renderQuiz();
+            return;
+        }
+        nextStep(5);
+    }
+    
+    function finalizeSummary() {
+        document.getElementById('print-name').innerText = userData.name || '—';
+        document.getElementById('print-dept').innerText = userData.dept || '—';
+        document.getElementById('print-roll').innerText = userData.roll || '—';
+        document.getElementById('final-score').innerText = `${quizScore}/5`;
+        const idCard = document.getElementById('id-card-print');
+        idCard.style.animation = 'none';
+        setTimeout(() => { idCard.style.animation = ''; }, 10);
+    }
+    
+    window.goToStep = function(step) {
+        if (step <= currentStep || step === currentStep + 1) {
+            if (step === 2 && currentStep === 1) nextStep(2);
+            else if (step === 3 && currentStep === 2) nextStep(3);
+            else if (step === 4 && currentStep === 3) {
+                if (userData.password) nextStep(4);
+                else alert("Complete security step first.");
+            }
+            else if (step === 5 && currentStep === 4 && quizScore >= 3) nextStep(5);
+            else if (step < currentStep) {
+                document.querySelector(`.step-card.active`).classList.remove('active');
+                currentStep = step;
+            }}}
+            </script>
+            </body>
+            </html>
